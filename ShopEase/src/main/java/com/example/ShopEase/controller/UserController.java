@@ -57,6 +57,7 @@ public class UserController {
         String email = JwtUtil.extractUsername(token);
         User user = userService.getUserByEmail(email);
         return ResponseEntity.ok(user);
+
     }
 
     // Optional: If you want a separate route just for admins
@@ -66,11 +67,16 @@ public class UserController {
         String email = JwtUtil.extractUsername(token);
         User admin = userService.getUserByEmail(email);
 
-        // Additional check (optional)
         if (!"ADMIN".equalsIgnoreCase(admin.getRole())) {
             return ResponseEntity.status(403).body("Access Denied: Not an Admin");
         }
 
-        return ResponseEntity.ok(admin);
+        Map<String, Object> response = new HashMap<>();
+        response.put("admin", admin);
+        response.put("allUsers", userService.getAllUsers());
+
+        return ResponseEntity.ok(response);
     }
+
+
 }

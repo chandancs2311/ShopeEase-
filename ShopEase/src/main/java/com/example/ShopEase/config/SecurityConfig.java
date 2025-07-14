@@ -31,11 +31,11 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                                 .requestMatchers("/api/user/login", "/api/user/register").permitAll()
 // specific matchers
-                                .requestMatchers("/api/user/profile").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+                                .requestMatchers("/api/user/profile").hasAnyAuthority( "ROLE_ADMIN","ROLE_USER")
                                 .requestMatchers("/api/user/admin/profile").hasAuthority("ROLE_ADMIN")
 // keep this LAST
                                 .requestMatchers("/api/user/**").hasAuthority("ROLE_USER")
-
+                                .requestMatchers("/api/admin/**").hasAnyAuthority("ROLE_ADMIN","ROLE_USER")
                                 .requestMatchers("/api/products/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
                         .requestMatchers("/api/categories/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
                         .requestMatchers("/api/user/orders/**").hasAuthority("ROLE_USER")
