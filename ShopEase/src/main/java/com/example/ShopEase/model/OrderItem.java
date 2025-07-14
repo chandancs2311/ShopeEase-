@@ -1,26 +1,32 @@
 package com.example.ShopEase.model;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
 @Getter
 @Setter
-@Table(name = "order_items")
+@NoArgsConstructor
+@AllArgsConstructor
+@Table(name = "order_item")
 public class OrderItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    private int orderId;
+    // Many items can belong to one order
+    @ManyToOne
+    @JoinColumn(name = "order_id", nullable = false)
+    private Order order;
 
+    @Column(name = "product_id", nullable = false)
     private int productId;
 
     private int quantity;
 
     private double price;
 
+    @Column(name = "total_price")
     private double totalPrice;
 }

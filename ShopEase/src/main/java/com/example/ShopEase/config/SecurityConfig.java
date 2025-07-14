@@ -29,24 +29,33 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
+
+                                // Login and Register
                                 .requestMatchers("/api/user/login", "/api/user/register").permitAll()
-// specific matchers
-                                .requestMatchers("/api/user/profile").hasAnyAuthority( "ROLE_ADMIN","ROLE_USER")
+
+// Profile
+                                .requestMatchers("/api/user/profile").hasAnyAuthority("ROLE_ADMIN", "ROLE_USER")
                                 .requestMatchers("/api/user/admin/profile").hasAuthority("ROLE_ADMIN")
-// keep this LAST
-                                .requestMatchers("/api/user/**").hasAuthority("ROLE_USER")
-                                .requestMatchers("/api/admin/**").hasAnyAuthority("ROLE_ADMIN","ROLE_USER")
+
+// Products and Categories
                                 .requestMatchers("/api/products/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
-                        .requestMatchers("/api/categories/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
-                        .requestMatchers("/api/user/orders/**").hasAuthority("ROLE_USER")
-                        .requestMatchers("/api/admin/orders/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
-                        .requestMatchers("/api/users/cart/**").hasAuthority("ROLE_USER")
+                                .requestMatchers("/api/categories/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
 
+// 🟡 Orders - MUST be ABOVE `/api/user/**` and `/api/admin/**`
+                                .requestMatchers("/api/user/orders/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+                                .requestMatchers("/api/admin/orders/**").hasAuthority("ROLE_ADMIN")
 
-                        .anyRequest().authenticated()
+// Cart
+                                .requestMatchers("/api/users/cart/**").hasAuthority("ROLE_USER")
+
+// 🟡 General admin and user endpoints - MUST BE LAST
+                                .requestMatchers("/api/admin/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+                                .requestMatchers("/api/user/**").hasAuthority("ROLE_USER")
+
+// Final catch-all
+
+                                .anyRequest().authenticated()
                 )
-
-
                 .exceptionHandling(exception ->
                         exception.accessDeniedHandler(customAccessDeniedHandler)
                 )

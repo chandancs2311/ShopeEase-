@@ -1,10 +1,13 @@
 package com.example.ShopEase.repository;
 
+import com.example.ShopEase.model.Order;
 import com.example.ShopEase.model.OrderItem;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
 public interface OrderItemRepository extends JpaRepository<OrderItem, Integer> {
-    List<OrderItem> findByOrderId(int orderId);
+
+    List<OrderItem> findByOrder(Order order); //  Correct
+
 }

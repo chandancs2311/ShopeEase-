@@ -26,10 +26,17 @@ public class OrderService {
     }
 
     public List<OrderItem> getOrderItems(int orderId) {
-        return orderItemRepository.findByOrderId(orderId);
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+        return orderItemRepository.findByOrder(order);
     }
+
 
     public List<Order> getAllOrders() {
         return orderRepository.findAll();
+    }
+
+    public void deleteOrder(int orderId) {
+        orderRepository.deleteById(orderId);
     }
 }
