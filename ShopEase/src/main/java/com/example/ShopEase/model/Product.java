@@ -4,11 +4,10 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "product")
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "product")
 public class Product {
 
     @Id
@@ -16,8 +15,6 @@ public class Product {
     private int id;
 
     private String name;
-
-    // Add other fields like description, price, imageUrl, etc.
     private String description;
     private double price;
     private String imageUrl;
@@ -26,3 +23,4 @@ public class Product {
     @JoinColumn(name = "category_id")
     private ProductCategory category;
 }
+

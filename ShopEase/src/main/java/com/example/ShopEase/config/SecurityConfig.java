@@ -29,10 +29,6 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-
-                                // Login and Register
-                                .requestMatchers("/api/user/login", "/api/user/register").permitAll()
-
 // Profile
                                 .requestMatchers("/api/user/profile").hasAnyAuthority("ROLE_ADMIN", "ROLE_USER")
                                 .requestMatchers("/api/user/admin/profile").hasAuthority("ROLE_ADMIN")
@@ -41,17 +37,20 @@ public class SecurityConfig {
                                 .requestMatchers("/api/products/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
                                 .requestMatchers("/api/categories/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
 
-// 🟡 Orders - MUST be ABOVE `/api/user/**` and `/api/admin/**`
+// 🟡 Orders
                                 .requestMatchers("/api/user/orders/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
                                 .requestMatchers("/api/admin/orders/**").hasAuthority("ROLE_ADMIN")
 
 // Cart
-                                .requestMatchers("/api/users/cart/**").hasAnyAuthority("ROLE_USER","ROLE_ADMIN")
+                                .requestMatchers("/api/user/cart/**").hasAnyAuthority("ROLE_USER","ROLE_ADMIN")
                                 .requestMatchers("/api/admin/cart/**").hasAuthority("ROLE_ADMIN")
 
+                                // Login and Register
+                                .requestMatchers("/api/user/login", "/api/user/register").permitAll()
+
 // 🟡 General admin and user endpoints - MUST BE LAST
-                                .requestMatchers("/api/admin/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
-                                .requestMatchers("/api/user/**").hasAuthority("ROLE_USER")
+                                .requestMatchers("/api/admin/**").hasAuthority("ROLE_ADMIN")
+                                .requestMatchers("/api/user/**").hasAnyAuthority("ROLE_USER","ROLE_ADMIN")
 
 // Final catch-all
 

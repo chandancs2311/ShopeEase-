@@ -1,39 +1,49 @@
 package com.example.ShopEase.config;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import com.example.ShopEase.model.User;
+import com.example.ShopEase.repository.UserRepository;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+
 import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+
 @Component
+@RequiredArgsConstructor
 public class JwtUtil {
 
-    private static final String SECRET = "your-32-character-secret-key-goes-here";
+    private final UserRepository userRepository;
 
-    private static Key getSignKey() {
-        return Keys.hmacShaKeyFor(SECRET.getBytes());
+    @Value("${jwt.secret}")
+    private String jwtSecret ;
+
+    private Key getSignKey() {
+        return Keys.hmacShaKeyFor(jwtSecret.getBytes());
     }
 
-    public static String extractUsername(String token) {
+
+    public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
-    public static String extractRole(String token) {
+    public String extractRole(String token) {
         return extractAllClaims(token).get("role", String.class);
     }
 
-    public static <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+    public <T> T extractClaim(String token, Function<Claims, T> resolver) {
         final Claims claims = extractAllClaims(token);
-        return claimsResolver.apply(claims);
+        return resolver.apply(claims);
     }
 
-    public static Claims extractAllClaims(String token) {
+    public Claims extractAllClaims(String token) {
         return Jwts
                 .parserBuilder()
                 .setSigningKey(getSignKey())
@@ -42,37 +52,48 @@ public class JwtUtil {
                 .getBody();
     }
 
-    public static String generateToken(String username, String role) {
+    public String generateToken(String username, String role, int userId) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("role", role);
+        claims.put("userId", userId);  // ✅ ADD THIS LINE
 
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(username)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // 10 hours
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60)) // 1 hour
                 .signWith(getSignKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    public static boolean isTokenValid(String token, String username) {
-        final String extractedUsername = extractUsername(token);
-        return (extractedUsername.equals(username) && !isTokenExpired(token));
 
+
+    public boolean isTokenValid(String token, String username) {
+        return (extractUsername(token).equals(username) && !isTokenExpired(token));
     }
 
-    private static boolean isTokenExpired(String token) {
+    private boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
 
-    private static Date extractExpiration(String token) {
+    private Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
 
     public boolean validateToken(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
-
     }
 
+    public int extractUserIdFromToken(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7);
+            String email = extractUsername(token);
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+            return user.getId();
+        }
+        throw new RuntimeException("Invalid token");
+    }
 }

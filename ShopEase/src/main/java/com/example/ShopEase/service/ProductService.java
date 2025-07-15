@@ -1,5 +1,4 @@
 package com.example.ShopEase.service;
-
 import com.example.ShopEase.model.Product;
 import com.example.ShopEase.repository.ProductRepository;
 import com.example.ShopEase.repository.UserRepository;
@@ -33,8 +32,10 @@ public class ProductService {
         productRepository.deleteById(id);
     }
 
-    // New method to get products by category ID
+
     public List<Product> getByCategoryId(int categoryId) {
-        return productRepository.findByCategoryId(categoryId);
+        return productRepository.findByCategory_Id(categoryId);
     }
-}
+
+    }
+

@@ -1,11 +1,11 @@
 package com.example.ShopEase.model;
+import com.example.ShopEase.model.Product;
 
 import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "order_items")
@@ -15,18 +15,16 @@ public class OrderItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    // Many items can belong to one order
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
-    private Order order;
+    private Order order; // This is correct
 
-    @Column(name = "product_id", nullable = false)
-    private int productId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id", nullable = false)
+    private Product product;
 
     private int quantity;
-
     private double price;
-
-    @Column(name = "total_price")
     private double totalPrice;
 }

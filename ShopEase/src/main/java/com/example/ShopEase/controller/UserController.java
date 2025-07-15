@@ -37,7 +37,8 @@ public class UserController {
         if (userOpt.isPresent()) {
             User user = userOpt.get();
             if (passwordEncoder.matches(password, user.getPassword())) {
-                String token = JwtUtil.generateToken(user.getEmail(), user.getRole());
+                String token = jwtUtil.generateToken(user.getEmail(), user.getRole(), user.getId());
+
 
                 return ResponseEntity.ok(Map.of(
                         "token", token,
@@ -50,21 +51,20 @@ public class UserController {
         return ResponseEntity.status(401).body(Map.of("error", "Invalid credentials"));
     }
 
-    // Profile endpoint for any authenticated user (admin/user)
+    // Profile
     @GetMapping("/profile")
     public ResponseEntity<?> getProfile(@RequestHeader("Authorization") String authHeader) {
         String token = authHeader.replace("Bearer ", "");
-        String email = JwtUtil.extractUsername(token);
+        String email = jwtUtil.extractUsername(token);
         User user = userService.getUserByEmail(email);
         return ResponseEntity.ok(user);
-
     }
 
-    // Optional: If you want a separate route just for admins
+    // Admin Profile
     @GetMapping("/admin/profile")
     public ResponseEntity<?> getAdminProfile(@RequestHeader("Authorization") String authHeader) {
         String token = authHeader.replace("Bearer ", "");
-        String email = JwtUtil.extractUsername(token);
+        String email = jwtUtil.extractUsername(token);
         User admin = userService.getUserByEmail(email);
 
         if (!"ADMIN".equalsIgnoreCase(admin.getRole())) {
@@ -77,6 +77,6 @@ public class UserController {
 
         return ResponseEntity.ok(response);
     }
-
-
 }
+
+

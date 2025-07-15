@@ -3,7 +3,6 @@ package com.example.ShopEase.service;
 import com.example.ShopEase.model.User;
 import com.example.ShopEase.repository.UserRepository;
 import com.example.ShopEase.config.JwtUtil;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -13,6 +12,7 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 public class UserService {
+
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
@@ -21,12 +21,12 @@ public class UserService {
     public void save(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         if (user.getRole() == null || user.getRole().isEmpty()) {
-            user.setRole("USER"); // default role
+            user.setRole("USER");
         }
         userRepository.save(user);
     }
 
-    //  Login and generate JWT if valid
+    // Login and generate JWT if valid
     public Map<String, Object> login(String email, String rawPassword) {
         Optional<User> userOpt = userRepository.findByEmail(email);
 
@@ -34,7 +34,7 @@ public class UserService {
             User user = userOpt.get();
 
             if (passwordEncoder.matches(rawPassword, user.getPassword())) {
-                String token = JwtUtil.generateToken(email, user.getRole());
+                String token = jwtUtil.generateToken(user.getEmail(), user.getRole(), user.getId());
 
                 Map<String, Object> response = new HashMap<>();
                 response.put("token", token);
@@ -43,21 +43,19 @@ public class UserService {
                 return response;
             }
         }
+
         throw new RuntimeException("Invalid credentials");
     }
 
-    //  Get all users (admin-only)
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
-    //  Get a user by email (for profile fetch)
     public User getUserByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
-    //  (Optional) Simple check for login validation
     public boolean isValidUser(String email, String rawPassword) {
         Optional<User> userOpt = userRepository.findByEmail(email);
         return userOpt.isPresent() &&
@@ -67,5 +65,4 @@ public class UserService {
     public Optional<User> findByEmail(String email) {
         return userRepository.findByEmail(email);
     }
-
 }
