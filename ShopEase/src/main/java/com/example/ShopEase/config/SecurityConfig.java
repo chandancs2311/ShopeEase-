@@ -46,7 +46,8 @@ public class SecurityConfig {
                                 .requestMatchers("/api/admin/orders/**").hasAuthority("ROLE_ADMIN")
 
 // Cart
-                                .requestMatchers("/api/users/cart/**").hasAuthority("ROLE_USER")
+                                .requestMatchers("/api/users/cart/**").hasAnyAuthority("ROLE_USER","ROLE_ADMIN")
+                                .requestMatchers("/api/admin/cart/**").hasAuthority("ROLE_ADMIN")
 
 // 🟡 General admin and user endpoints - MUST BE LAST
                                 .requestMatchers("/api/admin/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")

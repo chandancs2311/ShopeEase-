@@ -1,5 +1,6 @@
 package com.example.ShopEase.controller;
 
+import com.example.ShopEase.dto.OrderHistoryResponse;
 import com.example.ShopEase.model.Order;
 import com.example.ShopEase.model.OrderItem;
 import com.example.ShopEase.service.OrderService;
@@ -43,5 +44,10 @@ public class OrderController {
         orderService.deleteOrder(orderId);
         return ResponseEntity.ok("Order deleted successfully");
     }
+    @GetMapping("/history/{userId}")
+    public ResponseEntity<List<OrderHistoryResponse>> getUserOrderHistory(@PathVariable int userId) {
+        return ResponseEntity.ok(orderService.getOrderHistoryByUser(userId));
+    }
+
 
 }

@@ -1,22 +1,22 @@
 package com.example.ShopEase.model;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-
+import lombok.*;
+import java.util.List;
 import java.util.Date;
-
+@Data
 @Entity
-@Getter
-@Setter
-@Table(name = "cart")
+@AllArgsConstructor
+@NoArgsConstructor
 public class Cart {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    private int userId;
+    @ManyToOne
+    @JoinColumn(name = "user_id")  //  ONE source of truth
+    private User user;
 
-    private Date createdAt = new Date();
+    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CartItem> items;
 }
