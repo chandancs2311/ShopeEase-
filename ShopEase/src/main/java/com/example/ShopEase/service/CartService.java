@@ -1,4 +1,5 @@
 package com.example.ShopEase.service;
+import com.example.ShopEase.dto.CartItemResponse;
 import com.example.ShopEase.repository.ProductRepository;
 
 import com.example.ShopEase.model.Cart;
@@ -10,9 +11,12 @@ import com.example.ShopEase.repository.CartRepository;
 import com.example.ShopEase.repository.UserRepository;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import java.lang.ExceptionInInitializerError;
+import com.example.ShopEase.dto.CartItemRequest;
 
+import java.math.BigDecimal;
 import java.util.List;
 @Data
 @Service
@@ -38,17 +42,26 @@ public class CartService {
 
 
 
-    public CartItem addItem(CartItem item) {
-        //  Load actual product from DB
-        Product product = productRepository.findById(item.getProduct().getId())
+    public CartItem addItem(CartItemRequest request) {
+        Cart cart = cartRepository.findById(request.getCartId())
+                .orElseThrow(() -> new RuntimeException("Cart not found"));
+
+        Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
-        item.setProduct(product); // Now full product with name, price, etc.
-        item.setPrice(product.getPrice()); // Ensures accurate pricing
-        item.setTotalPrice(product.getPrice() * item.getQuantity());
+        CartItem item = new CartItem();
+        item.setCart(cart);
+        item.setProduct(product);
+        item.setQuantity(request.getQuantity());
+        item.setPrice(product.getPrice());
+        item.setTotalPrice(product.getPrice().multiply(BigDecimal.valueOf(request.getQuantity())));
 
         return cartItemRepository.save(item);
     }
+
+
+
+
 
     public void removeItem(int userId, int productId) {
         Cart cart = cartRepository.findByUserId(userId)
@@ -74,7 +87,23 @@ public class CartService {
     }
 
 
-    public List<CartItem> getItems(int cartId) {
-        return cartItemRepository.findByCartId(cartId);
+    public List<CartItemResponse> getCartItemsByUserAndCartId(int userId, int cartId) {
+        Cart cart = cartRepository.findById(cartId)
+                .orElseThrow(() -> new RuntimeException("Cart not found"));
+
+        if (cart.getUser().getId() != userId) {
+            throw new AccessDeniedException("Cart does not belong to this user");
+        }
+
+        return cart.getItems().stream().map(item -> {
+            CartItemResponse dto = new CartItemResponse();
+            dto.setId(item.getId());
+            dto.setProductName(item.getProduct().getName());
+            dto.setPrice(item.getPrice());
+            dto.setQuantity(item.getQuantity());
+            dto.setTotalPrice(item.getTotalPrice());
+            return dto;
+        }).toList();
     }
+
 }

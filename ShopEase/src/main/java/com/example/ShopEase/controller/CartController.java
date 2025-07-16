@@ -1,5 +1,7 @@
 package com.example.ShopEase.controller;
 
+import com.example.ShopEase.dto.CartItemRequest;
+import com.example.ShopEase.dto.CartItemResponse;
 import com.example.ShopEase.model.Cart;
 import com.example.ShopEase.model.CartItem;
 import com.example.ShopEase.service.CartService;
@@ -32,21 +34,30 @@ public class CartController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<?> addItem(@RequestBody CartItem item, HttpServletRequest request) {
-        int tokenUserId = jwtService.extractUserIdFromToken(request);
-        if (item.getUserId() != tokenUserId) {
-            return ResponseEntity.status(403).body("Access Denied: You can only add to your own cart.");
-        }
-        return ResponseEntity.ok(cartService.addItem(item));
+    public ResponseEntity<CartItem> addToCart(@RequestBody CartItemRequest request) {
+        CartItem addedItem = cartService.addItem(request);
+        return ResponseEntity.ok(addedItem);
     }
 
-    @GetMapping("/items/{cartId}/{userId}")
-    public ResponseEntity<?> getCartItems(@PathVariable int cartId, @PathVariable int userId, HttpServletRequest request) {
-        if (!jwtService.isTokenUserMatchingRequest(request, userId)) {
-            return ResponseEntity.status(403).body("Access Denied: You can only view your own cart.");
+    @GetMapping("/items/{userId}/{cartId}")
+    public ResponseEntity<?> getCartItemsByUserAndCartId(
+            @PathVariable int userId,
+            @PathVariable int cartId,
+            HttpServletRequest request) {
+
+        String role = jwtService.extractRoleFromToken(request);
+        int tokenUserId = jwtService.extractUserIdFromToken(request);
+
+        //  Only allow if the requester is the user or is admin
+        if (tokenUserId != userId && !"ADMIN".equalsIgnoreCase(role)) {
+            return ResponseEntity.status(403).body("Access Denied: You cannot view another user's cart.");
         }
-        return ResponseEntity.ok(cartService.getItems(cartId));
+
+        return ResponseEntity.ok(cartService.getCartItemsByUserAndCartId(userId, cartId));
     }
+
+
+
 
     @DeleteMapping("/remove")
     public ResponseEntity<?> removeItemFromCart(@RequestParam int userId, @RequestParam int productId, HttpServletRequest request) {

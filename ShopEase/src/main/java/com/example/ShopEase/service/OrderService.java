@@ -1,12 +1,16 @@
 package com.example.ShopEase.service;
 
 import com.example.ShopEase.dto.OrderHistoryResponse;
+import com.example.ShopEase.dto.OrderItemDTO;
 import com.example.ShopEase.model.Order;
 import com.example.ShopEase.model.OrderItem;
+import com.example.ShopEase.model.Product;
 import com.example.ShopEase.model.User;
 import com.example.ShopEase.repository.OrderItemRepository;
 import com.example.ShopEase.repository.OrderRepository;
+import com.example.ShopEase.repository.ProductRepository;
 import com.example.ShopEase.repository.UserRepository;
+import com.example.ShopEase.dto.OrderItemRequest;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
@@ -18,21 +22,35 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class OrderService {
-
+    private final ProductRepository productRepository;
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
     private final UserRepository userRepository;
 
-    // 🟢 Place Order
+    //  Place Order
     public Order placeOrder(Order order) {
         return orderRepository.save(order);
     }
 
-    // 🟢 Add Item to Order
-    public OrderItem addOrderItem(OrderItem item) {
-        item.setTotalPrice(item.getPrice() * item.getQuantity());
-        return orderItemRepository.save(item);
+    //  Add Item to Order
+    public void addOrderItem(OrderItemRequest request) {
+        Order order = orderRepository.findById(request.getOrderId())
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        Product product = productRepository.findById(request.getProductId())
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        OrderItem item = new OrderItem();
+        item.setOrder(order);
+        item.setProduct(product);
+        item.setQuantity(request.getQuantity());
+        item.setPrice(product.getPrice().doubleValue());
+        item.setTotalPrice(product.getPrice().doubleValue() * request.getQuantity());
+
+        orderItemRepository.save(item);
     }
+
+
 
     public List<OrderItem> getOrderItems(int orderId, int userId) {
         Order order = orderRepository.findById(orderId)
@@ -46,32 +64,32 @@ public class OrderService {
     }
 
 
-    // ✅ Full History with Items (only for logged-in user)
+    //  Full History with Items (only for logged-in user)
     public List<OrderHistoryResponse> getOrderHistoryByUser(int userId) {
-        // Optional: Add extra check if needed: like whether the user exists
-        if (!userRepository.existsById(userId)) {
-            throw new RuntimeException("User not found");
-        }
-
         List<Order> orders = orderRepository.findByUserId(userId);
-        List<OrderHistoryResponse> responseList = new ArrayList<>();
 
-        for (Order order : orders) {
-            List<OrderItem> items = orderItemRepository.findByOrder(order);
+        return orders.stream().map(order -> {
+            OrderHistoryResponse dto = new OrderHistoryResponse();
+            dto.setOrderId(order.getOrderId());
+            dto.setOrderDate(order.getOrderDate());
+            dto.setStatus(order.getStatus());
+            dto.setTotalAmount(order.getTotalAmount());
+            dto.setShippingAddress(order.getShippingAddress());
 
-            OrderHistoryResponse response = new OrderHistoryResponse();
-            response.setOrderId(order.getOrderId());
-            response.setTotalAmount(order.getTotalAmount());
-            response.setStatus(order.getStatus());
-            response.setOrderDate(order.getOrderDate());
-            response.setShippingAddress(order.getShippingAddress());
-            response.setItems(items);
+            List<OrderItemDTO> itemDTOs = order.getItems().stream().map(item -> {
+                OrderItemDTO itemDTO = new OrderItemDTO();
+                itemDTO.setProductName(item.getProduct().getName());
+                itemDTO.setQuantity(item.getQuantity());
+                itemDTO.setPrice(item.getPrice());
+                itemDTO.setTotalPrice(item.getTotalPrice());
+                return itemDTO;
+            }).toList();
 
-            responseList.add(response);
-        }
-
-        return responseList;
+            dto.setItems(itemDTOs);
+            return dto;
+        }).toList();
     }
+
 
     // 🟢 Admin-only: View All Orders
     public List<Order> getAllOrders() {

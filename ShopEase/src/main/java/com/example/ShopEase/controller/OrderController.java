@@ -1,5 +1,6 @@
 package com.example.ShopEase.controller;
 
+import com.example.ShopEase.dto.OrderItemRequest;
 import com.example.ShopEase.service.JwtService;
 import com.example.ShopEase.model.Order;
 
@@ -29,14 +30,14 @@ public class OrderController {
     }
 
     @PostMapping("/add-item")
-    public ResponseEntity<String> addItem(@RequestBody OrderItem item, HttpServletRequest request) {
-        int tokenUserId = jwtService.extractUserIdFromToken(request);
+    public ResponseEntity<String> addItem(@RequestBody OrderItemRequest request, HttpServletRequest httpReq) {
+        int tokenUserId = jwtService.extractUserIdFromToken(httpReq);
 
-        if (!orderService.isOrderOwnedByUser(item.getOrder().getOrderId(), tokenUserId)) {
+        if (!orderService.isOrderOwnedByUser(request.getOrderId(), tokenUserId)) {
             return ResponseEntity.status(403).body("You can't add items to another user's order.");
         }
 
-        orderService.addOrderItem(item);
+        orderService.addOrderItem(request); // Service handles mapping
         return ResponseEntity.ok("Item added successfully");
     }
 
@@ -45,17 +46,25 @@ public class OrderController {
 
     @GetMapping("/history/{userId}")
     public ResponseEntity<?> getUserOrderHistory(@PathVariable int userId, HttpServletRequest request) {
-        if (!jwtService.isTokenUserMatchingRequest(request, userId)) {
+        String role = jwtService.extractRoleFromToken(request);
+        int tokenUserId = jwtService.extractUserIdFromToken(request);
+
+        // ✅ Allow if token matches the pathUserId OR role is ADMIN
+        if (tokenUserId != userId && !"ADMIN".equalsIgnoreCase(role)) {
             return ResponseEntity.status(403).body("Access Denied: You can only view your own order history.");
         }
+
         return ResponseEntity.ok(orderService.getOrderHistoryByUser(userId));
     }
+
+
+
 
     @DeleteMapping("/{orderId}")
     public ResponseEntity<String> deleteOrder(@PathVariable int orderId, HttpServletRequest request) {
         int tokenUserId = jwtService.extractUserIdFromToken(request);
 
-        // ✅ Correct usage — check if the order belongs to this user
+        //  Correct usage — check if the order belongs to this user
         if (!orderService.isOrderOwnedByUser(orderId, tokenUserId)) {
             return ResponseEntity.status(403).body("You can only delete your own order.");
         }

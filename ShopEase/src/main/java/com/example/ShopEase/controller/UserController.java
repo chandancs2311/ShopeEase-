@@ -63,20 +63,30 @@ public class UserController {
     // Admin Profile
     @GetMapping("/admin/profile")
     public ResponseEntity<?> getAdminProfile(@RequestHeader("Authorization") String authHeader) {
+        //  1. Extract token from Bearer header
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(401).body("Missing or invalid Authorization header");
+        }
+
         String token = authHeader.replace("Bearer ", "");
-        String email = jwtUtil.extractUsername(token);
+
+        //  2. Extract email and fetch user
+        String email = jwtUtil.extractUsername(token); // username = email
         User admin = userService.getUserByEmail(email);
 
-        if (!"ADMIN".equalsIgnoreCase(admin.getRole())) {
+        //  3. Validate role
+        if (admin == null || !"ADMIN".equalsIgnoreCase(admin.getRole())) {
             return ResponseEntity.status(403).body("Access Denied: Not an Admin");
         }
 
+        //  4. Prepare response
         Map<String, Object> response = new HashMap<>();
         response.put("admin", admin);
-        response.put("allUsers", userService.getAllUsers());
+        response.put("allUsers", userService.getAllUsers()); // optional: include only minimal info
 
         return ResponseEntity.ok(response);
     }
+
 }
 
 

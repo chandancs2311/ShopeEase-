@@ -3,6 +3,8 @@ package com.example.ShopEase.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @Entity
 @Data
 @NoArgsConstructor
@@ -16,9 +18,9 @@ public class Product {
 
     private String name;
     private String description;
-    private double price;
+    private BigDecimal price;
     private String imageUrl;
-
+    private String stock;
     @ManyToOne
     @JoinColumn(name = "category_id")
     private ProductCategory category;
