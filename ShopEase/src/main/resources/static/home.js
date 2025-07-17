@@ -46,3 +46,9 @@
      images[currentIndex].style.display = 'block';
      currentIndex = (currentIndex + 1) % images.length;
  }, 2000);
+
+
+catDiv.addEventListener("click", () => {
+    localStorage.setItem("selectedCategory", cat.toLowerCase());
+    window.location.href = "product.html";
+});

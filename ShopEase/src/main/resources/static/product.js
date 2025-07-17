@@ -17,7 +17,7 @@ async function addToCart(productId) {
     }
 
     try {
-        const res = await fetch(`${API_BASE}/${userId}/cart`, {
+        const res = await fetch(`${API_BASE}/${userId}/cart/$add`, {
             method: "POST",
             headers: getHeaders(),
             body: JSON.stringify({ productId, quantity: 1 })
@@ -39,6 +39,7 @@ async function viewCart() {
     try {
         const res = await fetch(`${API_BASE}/${userId}/cart`, {
             headers: getHeaders()
+            method: "GET",
         });
         const cartItems = await res.json();
 
