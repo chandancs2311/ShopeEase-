@@ -60,11 +60,19 @@ public class CartController {
 
 
     @DeleteMapping("/remove")
-    public ResponseEntity<?> removeItemFromCart(@RequestParam int userId, @RequestParam int productId, HttpServletRequest request) {
-        if (!jwtService.isTokenUserMatchingRequest(request, userId)) {
-            return ResponseEntity.status(403).body("Access Denied: You can only remove from your own cart.");
+    public ResponseEntity<String> removeFromCart(@RequestBody Map<String, Integer> request, HttpServletRequest httpRequest) {
+        int userId = request.get("userId");
+        int productId = request.get("productId");
+
+        int tokenUserId = jwtService.extractUserIdFromToken(httpRequest);
+        String role = jwtService.extractRoleFromToken(httpRequest);
+
+        if (tokenUserId != userId && !"ADMIN".equalsIgnoreCase(role)) {
+            return ResponseEntity.status(403).body("Access Denied: You can't remove from another user's cart.");
         }
+
         cartService.removeItem(userId, productId);
         return ResponseEntity.ok("Item removed from cart");
     }
+
 }
