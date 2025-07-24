@@ -4,18 +4,24 @@
     <meta charset="UTF-8">
     <title>Order History - ShopEase</title>
     <link rel="stylesheet" href="order.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
 <body onload="loadOrderHistory()">
 
-<nav class="navbar">
-    <h1>ShopEase</h1>
-    <ul class="nav-links">
-        <li><a href="home.html">Home</a></li>
-        <li><a href="cart.html">Cart</a></li>
-        <li><a href="order.html" class="active">Orders</a></li>
-        <li><a href="login.html" onclick="logout()">Logout</a></li>
-    </ul>
-</nav>
+<!-- Navbar -->
+<header class="navbar">
+    <h2>ShopEase</h2>
+    <nav>
+        <ul>
+            <li><a href="#">About</a></li>
+            <li><a href="#">Contact</a></li>
+            <li><a href="cart.html" class="fa fa-shopping-cart" style="font-size:19px" > Cart</a></li>
+            <li><a href="order.html">Order History</a></li>
+            <li><a href="#" id="logoutBtn">Logout</a></li>
+        </ul>
+    </nav>
+</header>
+
 
 <main class="container">
     <h2>Your Order History</h2>
