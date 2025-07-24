@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Order History - ShopEase</title>
+    <link rel="stylesheet" href="order.css">
+</head>
+<body onload="loadOrderHistory()">
+
+<nav class="navbar">
+    <h1>ShopEase</h1>
+    <ul class="nav-links">
+        <li><a href="home.html">Home</a></li>
+        <li><a href="cart.html">Cart</a></li>
+        <li><a href="order.html" class="active">Orders</a></li>
+        <li><a href="login.html" onclick="logout()">Logout</a></li>
+    </ul>
+</nav>
+
+<main class="container">
+    <h2>Your Order History</h2>
+    <div id="orderHistory" class="order-list">
+        <!-- Orders will be dynamically inserted here -->
+    </div>
+</main>
+
+<script src="order.js"></script>
+<script>
+    function logout() {
+        localStorage.removeItem("token");
+        window.location.href = "login.html";
+    }
+</script>
+</body>
+</html>

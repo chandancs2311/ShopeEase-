@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Cart - ShopEase</title>
+    <link rel="stylesheet" href="cart.css" />
+</head>
+<body onload="loadCartItems()">
+<nav class="navbar">
+    <h1>ShopEase Cart</h1>
+    <a href="home.html">Home</a>
+    <a href="order.html">My Orders</a>
+    <a href="login.html" onclick="logout()">Logout</a>
+</nav>
+
+<section class="container">
+    <h2>Your Cart Items</h2>
+    <div id="cartItems" class="cart-items"></div>
+
+    <div class="actions">
+        <button onclick="placeOrder()">Place Order</button>
+    </div>
+</section>
+
+<script src="cart.js"></script>
+<script src="order.js"></script> <!-- for placeOrder() -->
+<script>
+    function logout() {
+      localStorage.removeItem("token");
+    }
+</script>
+</body>
+</html>

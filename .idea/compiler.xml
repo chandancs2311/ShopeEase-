@@ -9,6 +9,10 @@
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="false">
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.38/lombok-1.18.38.jar" />
+<<<<<<< HEAD
+=======
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.38/lombok-1.18.38.jar" />
+>>>>>>> 2c85b1f16306897fdb5ee5ddc637d0b73e74ddd0
         </processorPath>
         <module name="ShopEase" />
       </profile>
