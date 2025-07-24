@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Cart - ShopEase</title>
+    <link rel="stylesheet" href="cart.css" />
+</head>
+<body onload="loadCart()">
+<nav class="navbar white-bg">
+    <h1 class="brand">ShopEase</h1>
+    <a href="home.html">Home</a>
+    <a href="order.html">My Orders</a>
+    <a href="login.html" onclick="logout()">Logout</a>
+</nav>
+<section class="container" id="cart-container">
+    <h2>Your Cart Items</h2>
+
+    <!-- Cart Items Grid -->
+    <div id="cartItems" class="cart-items-grid">
+        <!-- JS will populate product cards here -->
+    </div>
+
+    <!-- Grand Total -->
+    <div class="cart-total">
+        <h3>Total: <span id="grandTotal">₹0.00</span></h3>
+    </div>
+
+    <div class="checkout-form">
+        <label for="shippingAddress">Shipping Address:</label>
+        <textarea id="shippingAddress" placeholder="Enter your address"></textarea>
+
+        <div class="actions">
+            <button onclick="placeOrder()" class="btn">Place Order</button>
+            <button onclick="goToOrders()" class="btn">View Order History</button>
+        </div>
+    </div>
+</section>
+
+
+<script src="cart.js"></script>
+<script src="order.js"></script>
+
+</body>
+</html>
